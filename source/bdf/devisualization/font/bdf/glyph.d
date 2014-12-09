@@ -27,64 +27,65 @@ import devisualization.font.bdf.font;
 import devisualization.image;
 
 class BDFGlyph : Glyph {
-    private {
-        BDFFont font;
-        ushort originalWidth;
-        ushort originalEncodedValue;
-
-        uint[] lines;
+	private {
+		BDFFont font;
+		ushort originalWidth;
+		ushort originalEncodedValue;
+		
+		uint[] lines;
 		uint width_;
 		uint height_;
-        Color_RGBA brush;
-        Color_RGBA brushBKGD;
-
+		Color_RGBA brush;
+		Color_RGBA brushBKGD;
+		
 		uint offsetX;
 		uint offsetY;
 		bool isBold;
 		bool isItalic;
-    }
-
-    this(BDFFont font, ushort encoded, ushort width, uint[] lines) {
-        this.font = font;
-        this.originalEncodedValue = encoded;
-        this.originalWidth = width;
+	}
+	
+	this(BDFFont font, ushort encoded, ushort width, uint[] lines) {
+		this.font = font;
+		this.originalEncodedValue = encoded;
+		this.originalWidth = width;
 		this.lines = lines;
+		
+		width_ = lines.length * 2;
+		height_ = lines.length * 2;
 
-		width_ = 8;
-		height_ = lines.length;
-
-        brush = new Color_RGBA(0, 0, 0, 1f);
-        brushBKGD = new Color_RGBA(0, 0, 0, 0f);
-    }
-
-    GlyphModifiers modifiers() {
+		
+		brush = new Color_RGBA(0, 0, 0, 1f);
+		brushBKGD = new Color_RGBA(0, 0, 0, 0f);
+	}
+	
+	GlyphModifiers modifiers() {
 		class GlyphMod : GlyphModifiers {
 			void italize() { // makes it italisized
 				isItalic = true;
 			}
-
+			
 			void bold() { // makes it boldenized
 				isBold = true;
 			}
-
+			
 			void width(uint width) { // scales
 				width_ = width;
 			}
-
+			
 			void kerning(ushort amount) { // adds width but doesn't scale
 				width_ += amount;
 				offsetX = amount;
 			}
-
+			
 			void height(uint amount) { // scales
 				height_ = amount;
 			}
-
+			
 			void lineHeight(uint amount) { // adds height to glyph but doesn't scale
 				height_ += amount;
 				offsetY = amount;
 			}
-
+			
 			void color(Color_RGBA primary, Color_RGBA background = null) {
 				brush = primary;
 				brushBKGD = background;
@@ -93,67 +94,105 @@ class BDFGlyph : Glyph {
 			void reset() { // reload image for glyph
 				offsetX = 0;
 				offsetY = 0;
-
+				
 				isBold = false;
 				isItalic = false;
-
+				
 				width_ = 8;
 				height_ = 8;
-
+				
 				brush = new Color_RGBA(0, 0, 0, 1f);
 				brushBKGD = new Color_RGBA(0, 0, 0, 0f);
 			}
 		}
-
+		
 		return new GlyphMod;
-    }
-
-    Image output() {
+	}
+	
+	Image output() {
 		import std.math : ceil;
 		import devisualization.image.mutable;
-		MutableImage image = new MutableImage(width_, height_);
+		uint useWidth = cast(uint)ceil(width_ * (isBold ? 1.2f : 1f));
+		
+		MutableImage image = new MutableImage(useWidth, height_);
 		auto i_ = image.rgba;
-
-		size_t addOnX = (isItalic ? (height_ / 8) : 0);
-		size_t perLineAddOnX = cast(size_t)((height_ - offsetY + 0f) / addOnX);
-		size_t count_X = cast(size_t)ceil((width_ - (offsetX + addOnX)) / (originalWidth + (isBold ? 1f : 2f)));
-		size_t count_Y = cast(size_t)ceil((height_ - offsetY) / (lines.length + (isBold ? 1f : 2f)));
-
-
+		
+		size_t addOnX = cast(size_t)(isItalic ? (height_ / 8f) : 1f);
+		size_t perLineAddOnX = cast(size_t)((height_ - offsetY) / addOnX);
+		size_t count_X = cast(size_t)ceil((useWidth - (offsetX + addOnX)) / originalWidth + 0f);
+		size_t count_Y = cast(size_t)ceil((height_ - offsetY) / lines.length + 0f);
+		
 		size_t yy = offsetY;
 		foreach(k, line; lines) {
 			size_t xx;
-
+			
 			if (isItalic) {
 				foreach(l; 0 .. (perLineAddOnX - (lines.length - k))) {
 					xx += addOnX;
 				}
 			}
-
+			
 			for (size_t i = 0; i < originalWidth; i++) {
 				Color_RGBA brushToUse = (line & (1 << (originalWidth - (i + 1)))) ? brush : brushBKGD;
-
+				
 				size_t y = yy;
 				foreach(_; 0 .. count_Y) {
 					size_t x = xx;
 					foreach(__; 0 .. count_X) {
-						if (x >= width_ || y >= height_)
+						if (x >= useWidth || y >= height_)
 							break;
-
+						
 						i_[i_.indexFromXY(x, y)] = brushToUse;
-
+						
 						x++;
 					}
-
+					
 					y++;
 				}
-
+				
 				xx += count_X;
 			}
-
+			
 			yy += count_Y;
 		}
+		
+		// strip out whitespace pixels
+		size_t bkgdLast;
+		size_t theY;
+		bool stillBKGD = true;
+		bool hitLast;
+		
+		image.applyByY((Color_RGBA color, size_t x, size_t y) {
+			if (color == brush) {
+				stillBKGD = false;
+			}
+			
+			if (theY != y) {
+				if (stillBKGD) {
+					bkgdLast++;
+				} else {
+					bkgdLast = 0;
+				}
+				
+				theY = y;
+				stillBKGD = true;
+				hitLast = true;
+			} else {
+				hitLast = false;
+			}
+		});
+		
+		if (!hitLast) {
+			if (stillBKGD)
+				bkgdLast++;
+			else {
+				bkgdLast = 0;
+			}
+		}
 
-        return image;
-    }
+		if (bkgdLast > 0)
+			image = resizeCrop(image, image.width - bkgdLast, image.height);
+		
+		return image;
+	}
 }

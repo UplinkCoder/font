@@ -46,7 +46,18 @@ void main() {
 		line ~= font.get(c);
 	}
 
-	//letters.modifiers().bold();
+	letters.modifiers().bold();
+
+	line = letters[2];
+	foreach(c; 'A' .. 'Z' + 1) {
+		line ~= font.get(c);
+	}
+	
+	line = letters[3];
+	foreach(c; 'a' .. 'z' + 1) {
+		line ~= font.get(c);
+	}
+	letters.modifiers().kerning(2);
 
 	letters.output().convertTo("png").exportTo("lines.png");
 }
