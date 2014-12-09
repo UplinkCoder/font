@@ -24,6 +24,8 @@
 module devisualization.font.font;
 import devisualization.font.glyph;
 
+alias FontNotExportable = Exception;
+
 interface Font {
     //this(ubyte[] data);
 
