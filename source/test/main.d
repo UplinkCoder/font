@@ -26,6 +26,25 @@ import devisualization.font.bdf;
 import devisualization.image;
 
 void main() {
-    Font font = createFont("test/gohufont-uni-14.bdf");
+	import devisualization.image.png;
+	Font font = createFont("test/gohufont-uni-14.bdf");
     Image glyph_a = font.get('a').output();
+
+	PngImage glyph_a_png = new PngImage(glyph_a);
+	glyph_a_png.exportTo("glyph_a.png");
+
+	GlyphSet letters;
+	GlyphLine line;
+
+	line = letters[0];
+	foreach(c; 'A' .. 'Z' + 1) {
+		line ~= font.get(c);
+	}
+
+	line = letters[1];
+	foreach(c; 'a' .. 'z' + 1) {
+		line ~= font.get(c);
+	}
+
+	letters.output().convertTo("png").exportTo("lines.png");
 }

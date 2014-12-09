@@ -36,10 +36,6 @@ class BDFFont : Font {
 
     this(ubyte[] data) {
         parser(this, data);
-
-        import std.stdio;
-        writeln(comments);
-        writeln(glyphs);
     }
 
     Glyph get(char c) {

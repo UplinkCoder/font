@@ -51,7 +51,7 @@ class BDFGlyph : Glyph {
 		this.lines = lines;
 
 		width_ = 8;
-		height_ = 8;
+		height_ = lines.length;
 
         brush = new Color_RGBA(0, 0, 0, 1f);
         brushBKGD = new Color_RGBA(0, 0, 0, 0f);
@@ -131,12 +131,14 @@ class BDFGlyph : Glyph {
 			}
 
 			for (size_t i = 0; i < originalWidth; i++) {
-				Color_RGBA brushToUse = (line & (1 << i)) ? brush : brushBKGD;
+				Color_RGBA brushToUse = (line & (1 << (originalWidth - (i + 1)))) ? brush : brushBKGD;
 
 				size_t y = yy;
 				foreach(_; 0 .. count_Y) {
 					size_t x = xx;
 					foreach(__; 0 .. count_X) {
+						if (x >= width_ || y >= height_)
+							break;
 
 						i_[i_.indexFromXY(x, y)] = brushToUse;
 

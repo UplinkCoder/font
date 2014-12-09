@@ -31,8 +31,8 @@ struct GlyphSet {
 	}
 
     GlyphLine opIndex(size_t line) {
-		if (line > lines.length) {
-			foreach(i; lines.length-1 .. line) {
+		if (line + 1 > lines.length) {
+			foreach(i; lines.length .. line+1) {
 				lines ~= new GlyphLine;
 			}
 		}
@@ -269,7 +269,7 @@ class GlyphLine {
 
 		if (height == 0) {
 			height = cheight;
-			width = cheight;
+			width = cwidth;
 		}
 		
 		Image ret = new MutableImage(width, height);
@@ -282,7 +282,9 @@ class GlyphLine {
 			foreach(j, pixel; __) {
 				size_t x = xx + __.xFromIndex(j);
 				size_t y = __.yFromIndex(j);
-				
+				if (x >= width || y >= height)
+					break;
+
 				_[_.indexFromXY(x, y)] = pixel;
 			}
 			
