@@ -12,7 +12,7 @@
 			"sourcePaths": ["source/interfaces"],
 			"importPaths": ["source/interfaces"],
             "dependencies": {
-                "de_image:interfaces": ">=0.1.3",
+                "de_image:interfaces": ">=0.2.0",
                 "de_image:mutable": "*"
             }
 		},
@@ -29,7 +29,8 @@
             "sourcePaths": ["source/test"],
             "importPaths": ["source/test"],
             "dependencies": {
-                "de_font:bdf": "*"
+                "de_font:bdf": "*",
+                "de_image:png": "*"
             }
         }
 	]
