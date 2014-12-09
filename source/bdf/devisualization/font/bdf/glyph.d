@@ -126,11 +126,11 @@ class BDFGlyph : Glyph {
 		foreach(k, line; lines) {
 			size_t xx;
 			
-			if (isItalic) {
-				foreach(l; 0 .. (perLineAddOnX - (lines.length - k))) {
+			/*if (isItalic) {
+				foreach(l; 0 .. (perLineAddOnX - k)) {
 					xx += addOnX;
 				}
-			}
+			}*/
 			
 			for (size_t i = 0; i < originalWidth; i++) {
 				Color_RGBA brushToUse = (line & (1 << (originalWidth - (i + 1)))) ? brush : brushBKGD;
