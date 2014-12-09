@@ -46,5 +46,7 @@ void main() {
 		line ~= font.get(c);
 	}
 
+	//letters.modifiers().bold();
+
 	letters.output().convertTo("png").exportTo("lines.png");
 }
