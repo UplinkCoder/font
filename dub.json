@@ -5,6 +5,7 @@
 	"authors": ["Richard Andrew Cattermole"],
 	"homepage": "https://github.com/Devisualization/font",
 	"license": "MIT",
+	"targetType": "none",
 	"sourcePaths": [],
 	"subPackages": [
 		{
@@ -12,7 +13,7 @@
 			"sourcePaths": ["source/interfaces"],
 			"importPaths": ["source/interfaces"],
             "dependencies": {
-                "de_image:interfaces": ">=0.2.1",
+                "de_image:interfaces": ">=0.2.2",
                 "de_image:mutable": "*"
             }
 		},

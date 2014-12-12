@@ -11,5 +11,4 @@ Should support nominal font formats.
 
 TODO
 -----
-- Fix italizing of BDF font
 - Other formats such as truetype/opentype

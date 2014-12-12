@@ -116,21 +116,14 @@ class BDFGlyph : Glyph {
 		
 		MutableImage image = new MutableImage(useWidth, height_);
 		auto i_ = image.rgba;
-		
-		size_t addOnX = cast(size_t)(isItalic ? (height_ / 8f) : 1f);
-		size_t perLineAddOnX = cast(size_t)((height_ - offsetY) / addOnX);
-		size_t count_X = cast(size_t)ceil((useWidth - (offsetX + addOnX)) / originalWidth + 0f);
+
+		size_t perLineAddOnX = cast(size_t)((height_ - offsetY));
+		size_t count_X = cast(size_t)ceil((useWidth - offsetX) / originalWidth + 0f);
 		size_t count_Y = cast(size_t)ceil((height_ - offsetY) / lines.length + 0f);
 		
 		size_t yy = offsetY;
 		foreach(k, line; lines) {
 			size_t xx;
-			
-			/*if (isItalic) {
-				foreach(l; 0 .. (perLineAddOnX - k)) {
-					xx += addOnX;
-				}
-			}*/
 			
 			for (size_t i = 0; i < originalWidth; i++) {
 				Color_RGBA brushToUse = (line & (1 << (originalWidth - (i + 1)))) ? brush : brushBKGD;
@@ -191,8 +184,12 @@ class BDFGlyph : Glyph {
 		}
 
 		if (bkgdLast > 0)
-			image = resizeCrop(image, image.width - bkgdLast, image.height);
-		
+			image = image.resizeCrop(image.width - bkgdLast, image.height);
+
+		if (isItalic) {
+			image = image.skewHorizontal(23, brushBKGD);
+		}
+
 		return image;
 	}
 }
