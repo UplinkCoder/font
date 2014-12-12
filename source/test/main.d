@@ -22,42 +22,69 @@
  * SOFTWARE.
  */
 import devisualization.font;
-import devisualization.font.bdf;
 import devisualization.image;
 
 void main() {
 	import devisualization.image.png;
-	Font font = createFont("test/gohufont-uni-14.bdf");
-    Image glyph_a = font.get('a').output();
+	Font font;
 
-	PngImage glyph_a_png = new PngImage(glyph_a);
-	glyph_a_png.exportTo("glyph_a.png");
+	version(Have_de_font_bdf) {
+		import devisualization.font.bdf;
+		font = createFont("test/gohufont-uni-14.bdf");
+	} else version(Have_de_font_opentype) {
+		import devisualization.font.opentype;
+		font = createFont("test/Roboto-Regular.ttf");
+	} else {
+		static assert(0, "No font provider available");
+	}
 
 	GlyphSet letters;
 	GlyphLine line;
+
+	// { bold
 
 	line = letters[0];
 	foreach(c; 'A' .. 'Z' + 1) {
 		line ~= font.get(c);
 	}
+	line.modifiers().bold();
 
 	line = letters[1];
 	foreach(c; 'a' .. 'z' + 1) {
 		line ~= font.get(c);
 	}
+	line.modifiers().bold();
 
-	letters.modifiers().bold();
+	// bold }
+	// { italize
 
 	line = letters[2];
 	foreach(c; 'A' .. 'Z' + 1) {
 		line ~= font.get(c);
 	}
-	
+	line.modifiers().italize();
+
 	line = letters[3];
 	foreach(c; 'a' .. 'z' + 1) {
 		line ~= font.get(c);
 	}
-	letters.modifiers().kerning(2);
+	line.modifiers().italize();
 
+	// italize }
+	// {
+
+	line = letters[4];
+	foreach(c; 'A' .. 'Z' + 1) {
+		line ~= font.get(c);
+	}
+	
+	line = letters[5];
+	foreach(c; 'a' .. 'z' + 1) {
+		line ~= font.get(c);
+	}
+
+	// }
+
+	letters.modifiers().kerning(2);
 	letters.output().convertTo("png").exportTo("lines.png");
 }
