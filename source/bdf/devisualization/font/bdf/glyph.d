@@ -33,6 +33,8 @@ class BDFGlyph : Glyph {
 		ushort originalEncodedValue;
 		
 		uint[] lines;
+		bool linesEmpty;
+
 		uint width_;
 		uint height_;
 		Color_RGBA brush;
@@ -53,6 +55,12 @@ class BDFGlyph : Glyph {
 		width_ = lines.length * 2;
 		height_ = lines.length * 2;
 
+		linesEmpty = true;
+		foreach(line; lines) {
+			if (line > 0) {
+				linesEmpty = false;
+			}
+		}
 		
 		brush = new Color_RGBA(0, 0, 0, 1f);
 		brushBKGD = new Color_RGBA(0, 0, 0, 0f);
@@ -121,77 +129,79 @@ class BDFGlyph : Glyph {
 			i_[i] = brushBKGD;
 		}
 
-		size_t perLineAddOnX = cast(size_t)((height_ - offsetY));
-		size_t count_X = cast(size_t)ceil((useWidth - offsetX) / originalWidth + 0f);
-		size_t count_Y = cast(size_t)ceil((height_ - offsetY) / lines.length + 0f);
-		
-		size_t yy = offsetY;
-		foreach(k, line; lines) {
-			size_t xx;
+		if (!linesEmpty) { // if the glyph is empty, why bother rasterizing?
+			size_t perLineAddOnX = cast(size_t)((height_ - offsetY));
+			size_t count_X = cast(size_t)ceil((useWidth - offsetX) / originalWidth + 0f);
+			size_t count_Y = cast(size_t)ceil((height_ - offsetY) / lines.length + 0f);
 			
-			for (size_t i = 0; i < originalWidth; i++) {
-				Color_RGBA brushToUse = (line & (1 << (originalWidth - (i + 1)))) ? brush : brushBKGD;
+			size_t yy = offsetY;
+			foreach(k, line; lines) {
+				size_t xx;
 				
-				size_t y = yy;
-				foreach(_; 0 .. count_Y) {
-					size_t x = xx;
-					foreach(__; 0 .. count_X) {
-						if (x >= useWidth || y >= height_)
-							break;
+				for (size_t i = 0; i < originalWidth; i++) {
+					Color_RGBA brushToUse = (line & (1 << (originalWidth - (i + 1)))) ? brush : brushBKGD;
+					
+					size_t y = yy;
+					foreach(_; 0 .. count_Y) {
+						size_t x = xx;
+						foreach(__; 0 .. count_X) {
+							if (x >= useWidth || y >= height_)
+								break;
+							
+							i_[i_.indexFromXY(x, y)] = brushToUse;
+							
+							x++;
+						}
 						
-						i_[i_.indexFromXY(x, y)] = brushToUse;
-						
-						x++;
+						y++;
 					}
 					
-					y++;
+					xx += count_X;
 				}
 				
-				xx += count_X;
+				yy += count_Y;
 			}
 			
-			yy += count_Y;
-		}
-		
-		// strip out whitespace pixels
-		size_t bkgdLast;
-		size_t theY;
-		bool stillBKGD = true;
-		bool hitLast;
-		
-		image.applyByY((Color_RGBA color, size_t x, size_t y) {
-			if (color == brush) {
-				stillBKGD = false;
-			}
+			// strip out whitespace pixels
+			size_t bkgdLast;
+			size_t theY;
+			bool stillBKGD = true;
+			bool hitLast;
 			
-			if (theY != y) {
-				if (stillBKGD) {
-					bkgdLast++;
+			image.applyByY((Color_RGBA color, size_t x, size_t y) {
+				if (color == brush) {
+					stillBKGD = false;
+				}
+				
+				if (theY != y) {
+					if (stillBKGD) {
+						bkgdLast++;
+					} else {
+						bkgdLast = 0;
+					}
+					
+					theY = y;
+					stillBKGD = true;
+					hitLast = true;
 				} else {
+					hitLast = false;
+				}
+			});
+			
+			if (!hitLast) {
+				if (stillBKGD)
+					bkgdLast++;
+				else {
 					bkgdLast = 0;
 				}
-				
-				theY = y;
-				stillBKGD = true;
-				hitLast = true;
-			} else {
-				hitLast = false;
 			}
-		});
-		
-		if (!hitLast) {
-			if (stillBKGD)
-				bkgdLast++;
-			else {
-				bkgdLast = 0;
+
+			if (bkgdLast > 0)
+				image = image.resizeCrop(image.width - bkgdLast, image.height, 0, 0, brushBKGD);
+
+			if (isItalic) {
+				image = image.skewHorizontal(23, brushBKGD);
 			}
-		}
-
-		if (bkgdLast > 0)
-			image = image.resizeCrop(image.width - bkgdLast, image.height, 0, 0, brushBKGD);
-
-		if (isItalic) {
-			image = image.skewHorizontal(23, brushBKGD);
 		}
 
 		return image;
