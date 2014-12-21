@@ -22,8 +22,11 @@
  * SOFTWARE.
  */
 module devisualization.font.glyphset;
+import devisualization.font.font;
+import devisualization.font.glyph;
 import devisualization.image.color;
 import devisualization.image;
+import std.traits : isSomeString;
 
 struct GlyphSet {
 	private {
@@ -50,6 +53,27 @@ struct GlyphSet {
 			lines = lines[1 .. $];
 		else
 			lines = lines[0 .. line] ~ lines[line + 1 .. $];
+	}
+
+	void fill(T)(Font font, T text, size_t offset) if (isSomeString!T) {
+		bool justNewLine;
+		GlyphLine line = this[offset];
+		foreach(c; text) {
+			if (c == '\n' || c == '\r') {
+				if (!justNewLine) {
+					offset++;
+					line = this[offset];
+					justNewLine = true;
+				}
+			} else {
+				justNewLine = false;
+
+				Glyph g = font.get(c);
+				if (g !is null) {
+					line ~= g;
+				}
+			}
+		}
 	}
 
 	GlyphSetModifiers modifiers() {
