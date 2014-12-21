@@ -28,6 +28,7 @@ import devisualization.image;
 struct GlyphSet {
 	private {
 		GlyphLine[] lines;
+		Color_RGBA brushBKGD = new Color_RGBA(0f, 0f, 0f, 0f);
 	}
 
     GlyphLine opIndex(size_t line) {
@@ -92,6 +93,8 @@ struct GlyphSet {
 				foreach(line; lines) {
 					line.modifiers.color(primary, background);
 				}
+
+				brushBKGD = background;
 			}
 			
 			void lineWrap(uint max) { // wraps the the glyph lines on to a new next one based upon its width
@@ -128,6 +131,10 @@ struct GlyphSet {
 		Image ret = new MutableImage(width, height);
 		auto _ = ret.rgba;
 
+		foreach(i; 0 .. _.length) {
+			_[i] = brushBKGD;
+		}
+
 		size_t yy;
 		foreach(line; iLines) {
 			auto __ = line.rgba;
@@ -152,6 +159,7 @@ class GlyphLine {
 	private {
 		Glyph[] glyphs;
 		uint maxSize_wrap;
+		Color_RGBA brushBKGD = new Color_RGBA(0f, 0f, 0f, 0f);
 	}
 
 	void opOpAssign(string type)(Glyph value) { // ~= adds a glyph to the line
@@ -218,6 +226,8 @@ class GlyphLine {
 				foreach(glyph; glyphs) {
 					glyph.modifiers.color(primary, background);
 				}
+
+				brushBKGD = background;
 			}
 			
 			void lineWrap(uint max) { // wraps the the glyph lines on to a new next one based upon its width
@@ -274,6 +284,10 @@ class GlyphLine {
 		
 		Image ret = new MutableImage(width, height);
 		auto _ = ret.rgba;
+
+		foreach(i; 0 .. _.length) {
+			_[i] = brushBKGD;
+		}
 		
 		size_t xx;
 		foreach(glyph; iGlyphs) {
