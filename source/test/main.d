@@ -84,6 +84,11 @@ void main() {
 	}
 
 	// }
+	// { some text
+
+	letters.fill(font, "Hi there!\nOne, two, three\r\nAnd now lastly\n\rgoodbye.", 6);
+
+	// some text }
 
 	letters.modifiers().kerning(2);
 	letters.output().convertTo("png").exportTo("lines.png");
