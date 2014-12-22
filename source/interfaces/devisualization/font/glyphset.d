@@ -121,12 +121,6 @@ struct GlyphSet {
 				brushBKGD = background;
 			}
 			
-			void lineWrap(uint max) { // wraps the the glyph lines on to a new next one based upon its width
-				foreach(line; lines) {
-					line.modifiers.lineWrap(max);
-				}
-			}
-			
 			void reset() { // reload image for glpyh
 				foreach(line; lines) {
 					line.modifiers.reset();
@@ -252,10 +246,6 @@ class GlyphLine {
 				}
 
 				brushBKGD = background;
-			}
-			
-			void lineWrap(uint max) { // wraps the the glyph lines on to a new next one based upon its width
-				maxSize_wrap = max;
 			}
 
 			void reset() { // reload image for glpyh
