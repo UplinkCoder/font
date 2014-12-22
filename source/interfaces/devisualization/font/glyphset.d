@@ -269,44 +269,28 @@ class GlyphLine {
 		return new LineModifiers;
 	}
 
-	Image output(){
+	Image output() {
 		import devisualization.image.mutable;
 		Image[] iGlyphs;
 		
-		size_t cheight;
-		size_t height;
-		size_t cwidth;
+		size_t ascent;
+		size_t descent;
 		size_t width;
 		
 		foreach(glyph; glyphs) {
-			iGlyphs ~= glyph.output();
+			Image output = glyph.output();
+			iGlyphs ~= output;
 
-			// ugh currently doesn't handle whitespace splitting!
-			if (maxSize_wrap > 0) {
-				if (cwidth + iGlyphs[$-1].width > maxSize_wrap) {
-					if (width < cwidth)
-						width = cwidth;
-					cwidth = 0;
-					height += cheight;
-					cheight = 0;
-				} else {
-					cwidth += iGlyphs[$-1].width;
-					if (cheight < iGlyphs[$-1].height)
-						cheight = iGlyphs[$-1].height;
-				}
-			} else {
-				cwidth += iGlyphs[$-1].width;
-				if (cheight < iGlyphs[$-1].height)
-					cheight = iGlyphs[$-1].height;
+			width += output.width;
+			if (ascent < glyph.ascent) {
+				ascent = glyph.ascent;
+			}
+			if (descent < glyph.descent) {
+				descent = glyph.descent;
 			}
 		}
-
-		if (height == 0) {
-			height = cheight;
-			width = cwidth;
-		}
 		
-		Image ret = new MutableImage(width, height);
+		Image ret = new MutableImage(width, ascent + descent);
 		auto _ = ret.rgba;
 
 		foreach(i; 0 .. _.length) {
@@ -314,14 +298,16 @@ class GlyphLine {
 		}
 		
 		size_t xx;
-		foreach(glyph; iGlyphs) {
+		foreach(i, glyph; iGlyphs) {
 			auto __ = glyph.rgba;
 
 			foreach(j, pixel; __) {
 				size_t x = xx + __.xFromIndex(j);
 				size_t y = __.yFromIndex(j);
-				if (x >= width || y >= height)
-					break;
+
+				y += ascent - glyphs[i].ascent;
+				if (x >= ret.width || y >= ret.height)
+					continue;
 
 				_[_.indexFromXY(x, y)] = pixel;
 			}

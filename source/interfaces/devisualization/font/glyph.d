@@ -27,6 +27,9 @@ import devisualization.image;
 interface Glyph {
     GlyphModifiers modifiers();
     Image output();
+
+	uint ascent();
+	uint descent();
 }
 
 interface GlyphModifiers {

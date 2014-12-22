@@ -34,6 +34,8 @@ class BDFGlyph : Glyph {
 		
 		uint[] lines;
 		bool linesEmpty;
+		uint ascent_;
+		uint descent_;
 
 		uint width_;
 		uint height_;
@@ -46,10 +48,12 @@ class BDFGlyph : Glyph {
 		bool isItalic;
 	}
 	
-	this(BDFFont font, ushort encoded, ushort width, uint[] lines) {
+	this(BDFFont font, ushort encoded, ushort width, uint ascent, uint descent, uint[] lines) {
 		this.font = font;
 		this.originalEncodedValue = encoded;
 		this.originalWidth = width;
+		this.ascent_ = ascent;
+		this.descent_ = descent;
 		this.lines = lines;
 		
 		width_ = lines.length * 2;
@@ -198,5 +202,13 @@ class BDFGlyph : Glyph {
 		}
 
 		return image;
+	}
+
+	uint ascent() {
+		return cast(uint)(height_ * (ascent_ / (ascent_ + descent_ + 0f)));
+	}
+
+	uint descent() {
+		return cast(uint)(height_ * (descent_ / (ascent_ + descent_ + 0f)));
 	}
 }

@@ -178,4 +178,14 @@ class FontFamilyGlyph : Glyph {
 		else
 			throw new FontNotExportable("Not exported font");
 	}
+
+	uint ascent() {
+		output(); // unless things have changed this won't rerasterize.
+		return temp.ascent;
+	}
+
+	uint descent() {
+		output(); // unless things have changed this won't rerasterize.
+		return temp.descent;
+	}
 }

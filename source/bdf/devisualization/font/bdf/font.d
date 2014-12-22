@@ -32,6 +32,9 @@ class BDFFont : Font {
         ushort width;
 
         BDFParsingGlyph[ushort] glyphs;
+
+		uint ascent;
+		uint descent;
     }
 
     this(ubyte[] data) {
@@ -41,7 +44,7 @@ class BDFFont : Font {
     Glyph get(char c) {
         import devisualization.font.bdf.glyph;
         if (cast(ushort)c in glyphs) {
-            return new BDFGlyph(this, cast(ushort)c, width, glyphs[cast(ushort)c].lines);
+            return new BDFGlyph(this, cast(ushort)c, width, ascent, descent, glyphs[cast(ushort)c].lines);
         }
         return null;
     }  // gets a glyph for charactor
@@ -49,7 +52,7 @@ class BDFFont : Font {
     Glyph get(dchar c) {
         import devisualization.font.bdf.glyph;
         if (cast(ushort)c in glyphs) {
-            return new BDFGlyph(this, cast(ushort)c, width, glyphs[cast(ushort)c].lines);
+			return new BDFGlyph(this, cast(ushort)c, width, ascent, descent, glyphs[cast(ushort)c].lines);
         }
         return null;
     } // "
@@ -57,7 +60,7 @@ class BDFFont : Font {
     Glyph get(wchar c) {
         import devisualization.font.bdf.glyph;
         if (cast(ushort)c in glyphs) {
-            return new BDFGlyph(this, cast(ushort)c, width, glyphs[cast(ushort)c].lines);
+			return new BDFGlyph(this, cast(ushort)c, width, ascent, descent, glyphs[cast(ushort)c].lines);
         }
         return null;
     } // "
@@ -183,6 +186,17 @@ private {
                 case "dwidth":
                 case "bbx":
                     break;
+
+				case "font_ascent":
+					foreach(value; values) {
+						ascent = to!uint(value);
+					}
+					break;
+				case "font_descent":
+					foreach(value; values) {
+						descent = to!uint(value);
+					}
+					break;
                    
                 default:
                     if (glyph !is null && glyph.inBitmap) {
