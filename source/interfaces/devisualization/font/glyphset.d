@@ -126,7 +126,6 @@ struct GlyphSet {
 					line.modifiers.reset();
 				}
 			}
-			
 		}
 		
 		return new SetModifiers;
@@ -176,7 +175,6 @@ class GlyphLine {
 
 	private {
 		Glyph[] glyphs;
-		uint maxSize_wrap;
 		Color_RGBA brushBKGD = new Color_RGBA(0f, 0f, 0f, 0f);
 	}
 
@@ -318,7 +316,6 @@ interface GlyphSetModifiers {
 	void lineHeight(uint amount); // adds height to glyph but doesn't scale
     void color(Color_RGBA primary, Color_RGBA background = null);
     
-	void lineWrap(uint max); // wraps the the glyph lines on to a new next one based upon its width
     void reset(); // reload image for glpyh
 }
 
