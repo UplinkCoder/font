@@ -133,21 +133,39 @@ class BDFGlyph : Glyph {
 			size_t perLineAddOnX = cast(size_t)((height_ - offsetY));
 			size_t count_X = cast(size_t)ceil((useWidth - offsetX) / originalWidth + 0f);
 			size_t count_Y = cast(size_t)ceil((height_ - offsetY) / lines.length + 0f);
-			
+
+			size_t minWithX = image.width;
+			size_t minMaxWithX;
+
 			size_t yy = offsetY;
 			foreach(k, line; lines) {
 				size_t xx;
-				
+
+				size_t[] minMaxWithXs;
+				minMaxWithXs.length = originalWidth;
+
 				for (size_t i = 0; i < originalWidth; i++) {
 					Color_RGBA brushToUse = (line & (1 << (originalWidth - (i + 1)))) ? brush : brushBKGD;
-					
+
+					if (brushToUse == brush) {
+						minMaxWithXs[i] = 0;
+						
+						if (minWithX > xx) {
+							minWithX = xx;
+						}
+						if (minMaxWithX < xx) {
+							minMaxWithXs[i] = xx;
+						}
+					}
+
 					size_t y = yy;
 					foreach(_; 0 .. count_Y) {
 						size_t x = xx;
+
 						foreach(__; 0 .. count_X) {
 							if (x >= useWidth || y >= height_)
 								break;
-							
+
 							i_[i_.indexFromXY(x, y)] = brushToUse;
 							
 							x++;
@@ -158,46 +176,21 @@ class BDFGlyph : Glyph {
 					
 					xx += count_X;
 				}
+
+				foreach(maxWithX; minMaxWithXs) {
+					if (maxWithX > minMaxWithX)
+						minMaxWithX = maxWithX;
+				}
 				
 				yy += count_Y;
 			}
-			
-			// strip out whitespace pixels
-			size_t bkgdLast;
-			size_t theY;
-			bool stillBKGD = true;
-			bool hitLast;
-			
-			image.applyByY((Color_RGBA color, size_t x, size_t y) {
-				if (color == brush) {
-					stillBKGD = false;
-				}
-				
-				if (theY != y) {
-					if (stillBKGD) {
-						bkgdLast++;
-					} else {
-						bkgdLast = 0;
-					}
-					
-					theY = y;
-					stillBKGD = true;
-					hitLast = true;
-				} else {
-					hitLast = false;
-				}
-			});
-			
-			if (!hitLast) {
-				if (stillBKGD)
-					bkgdLast++;
-				else {
-					bkgdLast = 0;
-				}
-			}
 
-			if (bkgdLast > 0)
-				image = image.resizeCrop(image.width - bkgdLast, image.height, 0, 0, brushBKGD);
+			if (minMaxWithX + count_X < image.width)
+				minMaxWithX += count_X;
+			else
+				minMaxWithX = image.width;
+
+			image = image.resizeCrop((minMaxWithX + offsetX) - minWithX, image.height, minWithX, 0, brushBKGD);
 
 			if (isItalic) {
 				image = image.skewHorizontal(23, brushBKGD);
