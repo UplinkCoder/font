@@ -40,7 +40,7 @@ class BDFGlyph : Glyph {
 		uint width_;
 		uint height_;
 		Color_RGBA brush;
-		Color_RGBA brushBKGD;
+		Color_RGBA* brushBKGD;
 		
 		uint offsetX;
 		uint offsetY;
@@ -66,7 +66,7 @@ class BDFGlyph : Glyph {
 			}
 		}
 		
-		brush = new Color_RGBA(0, 0, 0, 1f);
+		brush = Color_RGBA(0, 0, 0, 1f);
 		brushBKGD = new Color_RGBA(0, 0, 0, 0f);
 	}
 	
@@ -98,9 +98,12 @@ class BDFGlyph : Glyph {
 				offsetY = amount;
 			}
 			
-			void color(Color_RGBA primary, Color_RGBA background = null) {
+			void color(Color_RGBA primary, Color_RGBA* background = null) {
 				brush = primary;
-				brushBKGD = background;
+				if (background is null)
+					brushBKGD = new Color_RGBA(0, 0, 0, 0f);
+				else
+					brushBKGD = background;
 			}
 			
 			void reset() { // reload image for glyph
@@ -113,7 +116,7 @@ class BDFGlyph : Glyph {
 				width_ = 8;
 				height_ = 8;
 				
-				brush = new Color_RGBA(0, 0, 0, 1f);
+				brush = Color_RGBA(0, 0, 0, 1f);
 				brushBKGD = new Color_RGBA(0, 0, 0, 0f);
 			}
 		}
@@ -129,8 +132,10 @@ class BDFGlyph : Glyph {
 		MutableImage image = new MutableImage(useWidth, height_);
 		auto i_ = image.rgba;
 
-		foreach(i; 0 .. i_.length) {
-			i_[i] = brushBKGD;
+		if (brushBKGD !is null) {
+			foreach(i; 0 .. i_.length) {
+				i_[i] = *brushBKGD;
+			}
 		}
 
 		if (!linesEmpty) { // if the glyph is empty, why bother rasterizing?
@@ -149,7 +154,7 @@ class BDFGlyph : Glyph {
 				minMaxWithXs.length = originalWidth;
 
 				for (size_t i = 0; i < originalWidth; i++) {
-					Color_RGBA brushToUse = (line & (1 << (originalWidth - (i + 1)))) ? brush : brushBKGD;
+					Color_RGBA brushToUse = (line & (1 << (originalWidth - (i + 1)))) ? brush : *brushBKGD;
 
 					if (brushToUse == brush) {
 						minMaxWithXs[i] = 0;
@@ -197,7 +202,7 @@ class BDFGlyph : Glyph {
 			image = image.resizeCrop((minMaxWithX + offsetX) - minWithX, image.height, minWithX, 0, brushBKGD);
 
 			if (isItalic) {
-				image = image.skewHorizontal(23, brushBKGD);
+				image = image.skewHorizontal(23, *brushBKGD);
 			}
 		}
 

@@ -31,7 +31,7 @@ import std.traits : isSomeString;
 struct GlyphSet {
 	private {
 		GlyphLine[] lines;
-		Color_RGBA brushBKGD = new Color_RGBA(0f, 0f, 0f, 0f);
+		Color_RGBA* brushBKGD;
 	}
 
     GlyphLine opIndex(size_t line) {
@@ -113,7 +113,7 @@ struct GlyphSet {
 				}
 			}
 			
-			void color(Color_RGBA primary, Color_RGBA background = null) {
+			void color(Color_RGBA primary, Color_RGBA* background = null) {
 				foreach(line; lines) {
 					line.modifiers.color(primary, background);
 				}
@@ -148,8 +148,10 @@ struct GlyphSet {
 		Image ret = new MutableImage(width, height);
 		auto _ = ret.rgba;
 
-		foreach(i; 0 .. _.length) {
-			_[i] = brushBKGD;
+		if (brushBKGD !is null) {
+			foreach(i; 0 .. _.length) {
+				_[i] = *brushBKGD;
+			}
 		}
 
 		size_t yy;
@@ -175,7 +177,7 @@ class GlyphLine {
 
 	private {
 		Glyph[] glyphs;
-		Color_RGBA brushBKGD = new Color_RGBA(0f, 0f, 0f, 0f);
+		Color_RGBA* brushBKGD;
 	}
 
 	void opOpAssign(string type)(Glyph value) { // ~= adds a glyph to the line
@@ -238,7 +240,7 @@ class GlyphLine {
 				}
 			}
 
-			void color(Color_RGBA primary, Color_RGBA background = null) {
+			void color(Color_RGBA primary, Color_RGBA* background = null) {
 				foreach(glyph; glyphs) {
 					glyph.modifiers.color(primary, background);
 				}
@@ -281,8 +283,10 @@ class GlyphLine {
 		Image ret = new MutableImage(width, ascent + descent);
 		auto _ = ret.rgba;
 
-		foreach(i; 0 .. _.length) {
-			_[i] = brushBKGD;
+		if (brushBKGD !is null) {
+			foreach(i; 0 .. _.length) {
+				_[i] = *brushBKGD;
+			}
 		}
 		
 		size_t xx;
@@ -314,7 +318,9 @@ interface GlyphSetModifiers {
     void kerning(ushort amount); // adds width but doesn't scale
 	void height(uint amount); // scales
 	void lineHeight(uint amount); // adds height to glyph but doesn't scale
-    void color(Color_RGBA primary, Color_RGBA background = null);
+
+	final void color(Color_RGBA primary, Color_RGBA background) { color(primary, &background); }
+	void color(Color_RGBA primary, Color_RGBA* background = null);
     
     void reset(); // reload image for glpyh
 }

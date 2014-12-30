@@ -13,7 +13,7 @@
 			"sourcePaths": ["source/interfaces"],
 			"importPaths": ["source/interfaces"],
             "dependencies": {
-                "de_image:interfaces": ">=0.2.2",
+                "de_image:interfaces": ">=0.3.0",
                 "de_image:mutable": "*"
             }
 		},
@@ -21,6 +21,14 @@
 			"name": "bdf",
 			"sourcePaths": ["source/bdf"],
 			"importPaths": ["source/bdf"],
+            "dependencies": {
+                "de_font:interfaces": "*"
+            }
+		},
+		{
+			"name": "opentype",
+			"sourcePaths": ["source/opentype"],
+			"importPaths": ["source/opentype"],
             "dependencies": {
                 "de_font:interfaces": "*"
             }

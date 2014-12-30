@@ -45,7 +45,7 @@ class FontFamilyGlyph : Glyph {
 		uint height_;
 		uint lineHeight_;
 		Color_RGBA primary_;
-		Color_RGBA background_;
+		Color_RGBA* background_;
 		
 		bool tempChanged;
 		Glyph temp;
@@ -96,7 +96,7 @@ class FontFamilyGlyph : Glyph {
 				tempChanged = true;
 			}
 			
-			void color(Color_RGBA primary, Color_RGBA background = null) {
+			void color(Color_RGBA primary, Color_RGBA* background = null) {
 				primary_ = primary;
 				background_ = background;
 				
@@ -110,7 +110,7 @@ class FontFamilyGlyph : Glyph {
 				kerning_ = 0;
 				height_ = 0;
 				lineHeight_ = 0;
-				primary_ = null;
+				primary_ = Color_RGBA.init;
 				background_ = null;
 				
 				tempChanged = true;
@@ -165,8 +165,7 @@ class FontFamilyGlyph : Glyph {
 						mods.height(height_);
 					if (lineHeight_ > 0)
 						mods.lineHeight(lineHeight_);
-					if (primary_ !is null || background_ !is null)
-						mods.color(primary_, background_);
+					mods.color(primary_, background_);
 					
 					ret = temp.output();
 				}

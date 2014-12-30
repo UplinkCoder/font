@@ -50,7 +50,7 @@ class FontWithModifiers : Font {
 		uint height_;
 		uint lineHeight_;
 		Color_RGBA primary_;
-		Color_RGBA background_;
+		Color_RGBA* background_;
 	}
 
 	this(Font font) {
@@ -91,7 +91,7 @@ class FontWithModifiers : Font {
 					lineHeight_ = amount;
 				}
 
-				void color(Color_RGBA primary, Color_RGBA background = null) {
+				void color(Color_RGBA primary, Color_RGBA* background = null) {
 					primary_ = primary;
 					background_ = background;
 				}
@@ -103,7 +103,7 @@ class FontWithModifiers : Font {
 					kerning_ = 0;
 					height_ = 0;
 					lineHeight_ = 0;
-					primary_ = null;
+					primary_ = Color_RGBA.init;
 					background_ = null;
 				}
 			}
@@ -145,8 +145,7 @@ class FontWithModifiers : Font {
 				_.height(height_);
 			if (lineHeight_ >  0)
 				_.lineHeight(lineHeight_);
-			if (primary_ !is null)
-				_.color(primary_, background_);
+			_.color(primary_, background_);
 		}
 	}
 }

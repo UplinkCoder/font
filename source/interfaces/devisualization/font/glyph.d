@@ -39,7 +39,9 @@ interface GlyphModifiers {
 	void kerning(ushort amount); // adds width but doesn't scale
 	void height(uint amount); // scales
 	void lineHeight(uint amount); // adds height to glyph but doesn't scale
-    void color(Color_RGBA primary, Color_RGBA background = null);
+
+	final void color(Color_RGBA primary, Color_RGBA background) { color(primary, &background); }
+	void color(Color_RGBA primary, Color_RGBA* background = null);
 
     void reset(); // reload image for glyph
 }
